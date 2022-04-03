@@ -1,3 +1,5 @@
+Help I Forgot How To Use Git :(
+
 # JummBox
 
 JummBox is an online tool for sketching and sharing instrumental music.
