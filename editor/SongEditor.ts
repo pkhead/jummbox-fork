@@ -36,7 +36,7 @@ import { SpectrumEditor } from "./SpectrumEditor";
 import { ThemePrompt } from "./ThemePrompt";
 import { TipPrompt } from "./TipPrompt";
 import { ChangeTempo, ChangeChorus, ChangeEchoDelay, ChangeEchoSustain, ChangeReverb, ChangeVolume, ChangePan, ChangePatternSelection, ChangePatternsPerChannel, ChangePatternNumbers, ChangePulseWidth, ChangeFeedbackAmplitude, ChangeOperatorAmplitude, ChangeOperatorFrequency, ChangeDrumsetEnvelope, ChangePasteInstrument, ChangePreset, pickRandomPresetValue, ChangeRandomGeneratedInstrument, ChangeEQFilterType, ChangeNoteFilterType, ChangeEQFilterSimpleCut, ChangeEQFilterSimplePeak, ChangeNoteFilterSimpleCut, ChangeNoteFilterSimplePeak, ChangeScale, ChangeDetectKey, ChangeKey, ChangeRhythm, ChangeFeedbackType, ChangeAlgorithm, ChangeChipWave, ChangeNoiseWave, ChangeTransition, ChangeToggleEffects, ChangeVibrato, ChangeUnison, ChangeChord, ChangeSong, ChangePitchShift, ChangeDetune, ChangeDistortion, ChangeStringSustain, ChangeBitcrusherFreq, ChangeBitcrusherQuantization, ChangeAddEnvelope, ChangeAddChannelInstrument, ChangeRemoveChannelInstrument, ChangeCustomWave, ChangeOperatorWaveform, ChangeOperatorPulseWidth, ChangeSongTitle, ChangeVibratoDepth, ChangeVibratoSpeed, ChangeVibratoDelay, ChangeVibratoType, ChangePanDelay, ChangeArpeggioSpeed, ChangeFastTwoNoteArp, ChangeClicklessTransition, ChangeAliasing } from "./changes";
-
+import { Oscilloscope } from "./Oscilloscope";
 import { TrackEditor } from "./TrackEditor";
 
 const { button, div, input, select, span, optgroup, option, canvas } = HTML;
@@ -445,6 +445,9 @@ export class SongEditor {
     private readonly _eqFilterSimplePeakSlider: Slider = new Slider(input({ style: "margin: 0;", type: "range", min: "0", max: Config.filterSimplePeakRange - 1, value: "6", step: "1" }), this._doc, (oldValue: number, newValue: number) => new ChangeEQFilterSimplePeak(this._doc, oldValue, newValue), false);
     private _eqFilterSimplePeakRow: HTMLDivElement = div({ class: "selectRow", title: "Low-pass Filter Peak Resonance" }, span({ class: "tip", onclick: () => this._openPrompt("filterResonance") }, "Filter Peak:"), this._eqFilterSimplePeakSlider.container);
 
+    private readonly _oscilloContainer: HTMLDivElement = div({ class: "oscilloContainer", style: "width: 100%; height: 100px" });
+    private readonly _oscillo: Oscilloscope = new Oscilloscope(this._doc, this._oscilloContainer);
+
     private readonly _noteFilterSimpleButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", onclick: () => this._switchNoteFilterType(true) }, "simple");
     private readonly _noteFilterAdvancedButton: HTMLButtonElement = button({ style: "font-size: x-small; width: 50%; height: 40%", class: "last-button", onclick: () => this._switchNoteFilterType(false) }, "advanced");
     private readonly _noteFilterTypeRow: HTMLElement = div({ class: "selectRow", style: "padding-top: 4px; margin-bottom: 0px;" }, span({ style: "font-size: x-small;", class: "tip", onclick: () => this._openPrompt("filterType") }, "Note Filt.Type:"), div({ class: "instrument-bar" }, this._noteFilterSimpleButton, this._noteFilterAdvancedButton));
@@ -753,6 +756,7 @@ export class SongEditor {
     );
 
     public readonly mainLayer: HTMLDivElement = div({ class: "beepboxEditor", tabIndex: "0" },
+        this._oscilloContainer,
         this._patternArea,
         this._trackArea,
         this._settingsArea,
@@ -794,7 +798,6 @@ export class SongEditor {
     private lastOutVolumeCap: number = 0;
 
     constructor(private _doc: SongDocument) {
-
         this._doc.notifier.watch(this.whenUpdated);
         window.addEventListener("resize", this.whenUpdated);
 
@@ -3041,6 +3044,7 @@ export class SongEditor {
             this._noteFilterEditor.render(true);
         }
 
+        this._oscillo.redraw();
 
         window.requestAnimationFrame(this._animate);
     }

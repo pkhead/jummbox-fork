@@ -6783,6 +6783,8 @@ export class Synth {
 
     }
 
+    public oscilloL: Float32Array = new Float32Array(2048);
+
     private audioProcessCallback = (audioProcessingEvent: any): void => {
         const outputBuffer = audioProcessingEvent.outputBuffer;
         const outputDataL: Float32Array = outputBuffer.getChannelData(0);
@@ -6807,6 +6809,9 @@ export class Synth {
         } else {
             this.synthesize(outputDataL, outputDataR, outputBuffer.length, this.isPlayingSong);
         }
+
+        // copy outputDataL to freqDataL
+        this.oscilloL.set(outputDataL, 0);
     }
 
     public synthesize(outputDataL: Float32Array, outputDataR: Float32Array, outputBufferLength: number, playSong: boolean = true): void {
